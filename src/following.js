@@ -25,6 +25,10 @@ async function getFollowing(req, res) {
 }
 
 async function addFollowing(req, res) {
+    if (req.username == req.params.user) {
+        return res.sendStatus(400);
+    }
+
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
 
     let user = await (connector.then(async () => {
@@ -42,13 +46,20 @@ async function addFollowing(req, res) {
         return res.send({ username: user.username, following: user.following });
     }
 
-    user.following.push(req.params.user);
-    await (connector.then(async () => {
-        return User.updateOne({ username: req.username }, { following: user.following }).exec();
+    let followedUser = await (connector.then(async () => {
+        return User.findOne({ username: req.params.user }).exec();
     }));
-    user = await (connector.then(async () => {
-        return User.findOne({ username: req.username }).exec();
-    }));
+
+    if (followedUser != null) {
+        user.following.push(req.params.user);
+        await (connector.then(async () => {
+            return User.updateOne({ username: req.username }, { following: user.following }).exec();
+        }));
+
+        user = await (connector.then(async () => {
+            return User.findOne({ username: req.username }).exec();
+        }));
+    }
 
     return res.send({ username: user.username, following: user.following });
 }
@@ -68,10 +79,10 @@ async function removeFollowing(req, res) {
     }
 
     if (idx < 0) {
-        return res.send(400);
+        return res.sendStatus(400);
     }
 
-    user.following = user.following.splice(idx, 1);
+    user.following.splice(idx, 1);
     await (connector.then(async () => {
         return User.updateOne({ username: req.username }, { following: user.following }).exec();
     }));
