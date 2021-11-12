@@ -13,7 +13,7 @@ async function getProfile(req, res, mine, attr) {
     });
 
     return res.send({
-        username: user.username, [attr]: attr == 'dob' ? (new Date(user[attr])).getTime() : user[attr]
+        username: user.username, [attr]: attr == 'dob' ? user[attr].getTime() : user[attr]
     });
 }
 

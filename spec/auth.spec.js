@@ -9,7 +9,7 @@ const url = path => `http://localhost:3000${path}`;
 describe('Validate Registration and Login functionality', () => {
 
     it('register new user', (done) => {
-        let regUser = { "username": "testUser1", "password": "123", "email": "test@rice.edu", "zipcode": "77005", "dob": 1289742198 };
+        let regUser = { "username": "testUser1", "password": "123", "email": "test@rice.edu", "zipcode": "77005", "dob": 1002661200000 };
         fetch(url('/register'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
