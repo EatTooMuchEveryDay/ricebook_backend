@@ -1,11 +1,18 @@
-const md5 = require('md5')
+const md5 = require('md5');
+// const { RedisClient } = require('redis');
+// const redis = require('redis').createClient('redis://:pbc3da20f6d535863ee1f32388a3b682d1911feb7258d23b087fc2b23119428b3@ec2-54-144-44-166.compute-1.amazonaws.com:6539');//(process.env.REDIS_URL);
+const mongoose = require('mongoose');
+const userSchema = require('./userSchema');
+const User = mongoose.model('user', userSchema);
+const connectionString = 'mongodb+srv://new-user1:ricecomp531@cluster0.kcggc.mongodb.net/ricebook';
 
-const redis = require('redis').createClient(process.env.REDIS_URL);
 
-// let sessionUser = {};
+let sessionUser = {};
 let cookieKey = "sid";
 
-let userObjs = {};
+// let userObjs = {};
+
+
 
 function isLoggedIn(req, res, next) {
     // likely didn't install cookie parser
@@ -20,8 +27,8 @@ function isLoggedIn(req, res, next) {
         return res.sendStatus(401);
     }
 
-    // let username = sessionUser[sid];
-    let username = redis.hget('session', sid);
+    let username = sessionUser[sid];
+    // let username = redis.hget('session', sid);
 
     // no username mapped to sid
     if (username) {
@@ -33,7 +40,7 @@ function isLoggedIn(req, res, next) {
     }
 }
 
-function login(req, res) {
+async function login(req, res) {
     let username = req.body.username;
     let password = req.body.password;
 
@@ -42,7 +49,11 @@ function login(req, res) {
         return res.sendStatus(400);
     }
 
-    let user = userObjs[username];
+    // let user = userObjs[username];
+    const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+    let user = await (connector.then(async () => {
+        return User.findOne({ username: username }).exec();
+    }));
 
     if (!user) {
         return res.sendStatus(401)
@@ -52,8 +63,8 @@ function login(req, res) {
 
     if (hash === user.hash) {
         let sid = Math.floor(Math.random() * 10000000);
-        // sessionUser[sid]=(username);
-        redis.hset('session', sid, username);
+        sessionUser[sid] = (username);
+        // redis.hset('session', sid, username);
 
         // Adding cookie for session id
         res.cookie(cookieKey, sid, { maxAge: 3600 * 1000, httpOnly: true });
@@ -65,7 +76,21 @@ function login(req, res) {
     }
 }
 
-function register(req, res) {
+function logout(req, res) {
+    let sid = req.cookies[cookieKey];
+
+    // let username = sessionUser[sid];
+    // let username = redis.hget('session', sid);
+
+    // redis.hdel('session', sid);
+    delete sessionUser[sid];
+
+    let msg = 'OK';
+    res.send(msg);
+}
+
+async function register(req, res) {
+    let body = req.body;
     let username = req.body.username;
     let password = req.body.password;
 
@@ -77,15 +102,48 @@ function register(req, res) {
     let salt = username + new Date().getTime();
     let hash = md5(salt + password);
 
-    userObjs[username] = { salt: salt, hash: hash };
+    // userObjs[username] = { salt: salt, hash: hash };
 
-    let msg = { username: username, result: 'success' };
+    // (async () => {
+    const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+
+    let flag = await (connector.then(async () => {
+        let ret = await User.findOne({ username: username }).exec();
+        if (ret != null) {
+            return false;
+        }
+
+        new User({
+            username: username,
+            salt: salt,
+            hash: hash,
+            following: [],
+            headline: 'Say something.',
+            email: body.email,
+            zipcode: body.zipcode,
+            dob: body.dob
+        }).save();
+
+        return true;
+    }));
+    // })();
+
+    let msg = { username: username };
+    if (flag) {
+        msg.result = 'success';
+    } else {
+        msg.result = 'failed';
+    }
+
     res.send(msg);
 }
+
+
 
 
 module.exports = (app) => {
     app.post('/register', register);
     app.post('/login', login);
     app.use(isLoggedIn);
+    app.put('/logout', logout);
 }

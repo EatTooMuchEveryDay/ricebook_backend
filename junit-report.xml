@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites>
+<testsuite name="Validate Article functionality" errors="0" tests="3" failures="0" time="0.408" timestamp="2021-11-12T11:26:39">
+  <testcase classname="Validate Article functionality" name="should give me three or more articles" time="0.131"></testcase>
+  <testcase classname="Validate Article functionality" name="should add new article with successive article id, return list of articles with new article" time="0.17"></testcase>
+  <testcase classname="Validate Article functionality" name="should return an article with a specified id" time="0.105"></testcase>
+</testsuite>
+<testsuite name="Validate Headline functionality" errors="0" tests="2" failures="0" time="0.269" timestamp="2021-11-12T11:26:39">
+  <testcase classname="Validate Headline functionality" name="should give me the headline" time="0.109"></testcase>
+  <testcase classname="Validate Headline functionality" name="should update the headline" time="0.16"></testcase>
+</testsuite>
+<testsuite name="Validate Registration and Login functionality" errors="0" tests="3" failures="0" time="0.178" timestamp="2021-11-12T11:26:39">
+  <testcase classname="Validate Registration and Login functionality" name="register new user" time="0.059"></testcase>
+  <testcase classname="Validate Registration and Login functionality" name="login user" time="0.059"></testcase>
+  <testcase classname="Validate Registration and Login functionality" name="logout user" time="0.059"></testcase>
+</testsuite>
+</testsuites>
