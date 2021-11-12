@@ -12,7 +12,9 @@ async function getProfile(req, res, mine, attr) {
         return User.findOne({ username: mine ? req.username : req.params.user }).exec();
     });
 
-    return res.send({ username: user.username, [attr]: user[attr] });
+    return res.send({
+        username: user.username, [attr]: attr == 'dob' ? (new Date(user[attr])).getTime() : user[attr]
+    });
 }
 
 async function updateProfile(req, res, attr) {
@@ -39,7 +41,7 @@ async function getAvatar(req, res) {
     // });
 
     // TODO
-    return res.send({ username: req.params.user, avatar: 'hardcoded avatar url'});
+    return res.send({ username: req.params.user, avatar: 'hardcoded avatar url' });
 }
 
 async function getMyAvatar(req, res) {
@@ -50,7 +52,7 @@ async function getMyAvatar(req, res) {
     });
 
     // TODO
-    return res.send({ username: user.username, avatar: 'hardcoded avatar url'});
+    return res.send({ username: user.username, avatar: 'hardcoded avatar url' });
 }
 
 async function updateAvatar(req, res) {
@@ -61,7 +63,7 @@ async function updateAvatar(req, res) {
     });
 
     // TODO
-    return res.send({ username: user.username, avatar: 'hardcoded avatar url'});
+    return res.send({ username: user.username, avatar: 'hardcoded avatar url' });
 }
 
 module.exports = (app) => {

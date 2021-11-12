@@ -89,6 +89,9 @@ describe('Validate Article functionality', () => {
             if (res.articles instanceof Array) {
                 let target = res.articles[0];
                 for(let attr in article){
+                    if(attr=='time'){
+                        continue;
+                    }
                     expect(JSON.stringify(target[attr]) == JSON.stringify(article[attr])).toEqual(true);
                 }
             }

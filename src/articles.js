@@ -30,7 +30,7 @@ async function getArticle(req, res) {
 async function addArticle(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
     let post = req.body;
-    let article = { id: md5(req.username + Date.now() + Math.random()), author: req.username, text: post.text, comments: [] };
+    let article = { id: md5(req.username + Date.now() + Math.random()), author: req.username, text: post.text, comments: [], time: Date.now() };
     // articles.push(article);
     await (connector.then(async () => {
         return new Article(article).save();
