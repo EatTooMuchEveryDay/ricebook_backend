@@ -4,11 +4,7 @@ const userSchema = new mongoose.Schema({
   username: String,
   salt: String,
   hash: String,
-  headline: String,
-  following: Array,
-  dob: Date,
-  zipcode: String,
-  email: String
+  following: Array
 })
 
 module.exports = userSchema;

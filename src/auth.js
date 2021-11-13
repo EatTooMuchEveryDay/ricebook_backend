@@ -4,6 +4,8 @@ const md5 = require('md5');
 const mongoose = require('mongoose');
 const userSchema = require('./userSchema');
 const User = mongoose.model('user', userSchema);
+const profileSchema = require('./profileSchema');
+const Profile = mongoose.model('profile', profileSchema);
 const connectionString = 'mongodb+srv://new-user1:ricecomp531@cluster0.kcggc.mongodb.net/ricebook';
 
 
@@ -11,7 +13,6 @@ let sessionUser = {};
 let cookieKey = "sid";
 
 // let userObjs = {};
-
 
 
 function isLoggedIn(req, res, next) {
@@ -118,6 +119,27 @@ async function register(req, res) {
             salt: salt,
             hash: hash,
             following: [],
+            // headline: 'Say something.'
+            // email: body.email,
+            // zipcode: body.zipcode,
+            // dob: body.dob
+        }).save();
+
+        return true;
+    }));
+    // })();
+
+    flag = flag && await (connector.then(async () => {
+        let ret = await Profile.findOne({ username: username }).exec();
+        if (ret != null) {
+            return false;
+        }
+
+        new Profile({
+            username: username,
+            // salt: salt,
+            // hash: hash,
+            // following: [],
             headline: 'Say something.',
             email: body.email,
             zipcode: body.zipcode,
@@ -126,7 +148,6 @@ async function register(req, res) {
 
         return true;
     }));
-    // })();
 
     let msg = { username: username };
     if (flag) {
@@ -139,6 +160,23 @@ async function register(req, res) {
 }
 
 
+async function updatePassword(req, res) {
+    let body = req.body;
+
+    const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+
+    let salt = (await connector.then(() => {
+        return User.findOne({ username: req.username }).exec();
+    })).salt;
+    let hash = md5(salt + body.password);
+
+    await connector.then(() => {
+        return User.updateOne({ username: req.username }, { hash: hash }).exec();
+    });
+
+    res.send({ username: req.username, result: 'success' });
+}
+
 
 
 module.exports = (app) => {
@@ -146,4 +184,5 @@ module.exports = (app) => {
     app.post('/login', login);
     app.use(isLoggedIn);
     app.put('/logout', logout);
+    app.put('/password', updatePassword);
 }
