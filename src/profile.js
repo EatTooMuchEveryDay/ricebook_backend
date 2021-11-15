@@ -48,27 +48,27 @@ async function updateProfile(req, res, attr) {
 }
 
 
-async function getAvatar(req, res) {
-    const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+// async function getAvatar(req, res) {
+//     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
 
-    // let user = await connector.then(() => {
-    //     return User.findOne({ username: req.params.user }).exec();
-    // });
+//     // let user = await connector.then(() => {
+//     //     return User.findOne({ username: req.params.user }).exec();
+//     // });
 
-    // TODO
-    return res.send({ username: req.params.user, avatar: 'hardcoded avatar url' });
-}
+//     // TODO
+//     return res.send({ username: req.params.user, avatar: 'hardcoded avatar url' });
+// }
 
-async function getMyAvatar(req, res) {
-    const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
+// async function getMyAvatar(req, res) {
+//     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
 
-    let profile = await connector.then(() => {
-        return Profile.findOne({ username: req.username }).exec();
-    });
+//     let profile = await connector.then(() => {
+//         return Profile.findOne({ username: req.username }).exec();
+//     });
 
-    // TODO
-    return res.send({ username: profile.username, avatar: 'hardcoded avatar url' });
-}
+//     // TODO
+//     return res.send({ username: profile.username, avatar: 'hardcoded avatar url' });
+// }
 
 async function updateAvatar(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -77,7 +77,7 @@ async function updateAvatar(req, res) {
         return Profile.findOne({ username: req.username }).exec();
     });
 
-    // TODO
+    // TODO update avatar
     return res.send({ username: user.username, avatar: 'hardcoded avatar url' });
 }
 
@@ -95,7 +95,7 @@ module.exports = (app) => {
     app.get('/dob/:user', (res, req) => { getProfile(res, req, false, 'dob') });
     app.get('/dob', (res, req) => { getProfile(res, req, true, 'dob') });
 
-    app.get('/avatar/:user', getAvatar);
-    app.get('/avatar', getMyAvatar);
+    app.get('/avatar/:user', (res, req) => { getProfile(res, req, false, 'avatar') });
+    app.get('/avatar', (res, req) => { getProfile(res, req, true, 'avatar') });
     app.put('/avatar', updateAvatar);
 }

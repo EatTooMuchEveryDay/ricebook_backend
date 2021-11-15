@@ -143,7 +143,8 @@ async function register(req, res) {
             headline: 'Say something.',
             email: body.email,
             zipcode: body.zipcode,
-            dob: body.dob
+            dob: body.dob,
+            avatar: 'avatar.jpg'
         }).save();
 
         return true;

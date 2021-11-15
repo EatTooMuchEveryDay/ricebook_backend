@@ -5,7 +5,8 @@ const profileSchema = new mongoose.Schema({
   headline: String,
   dob: Date,
   zipcode: String,
-  email: String
+  email: String,
+  avatar: String
 })
 
 module.exports = profileSchema;
