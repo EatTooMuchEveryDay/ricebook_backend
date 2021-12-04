@@ -20,17 +20,20 @@ const hello = (req, res) => res.send({ hello: 'world' });
 
 
 const app = express();
-app.use(cors({
-    origin: (origin, callback) => {
-        // if (whiteList.indexOf(origin) !== -1) return callback(null, true)
-        return callback(null, true);
-        callback(new Error('Not allowed by CORS'))
-    },
-    credentials: true
-}));
+// app.use(cors({
+//     origin: (origin, callback) => {
+//         // if (whiteList.indexOf(origin) !== -1) return callback(null, true)
+//         return callback(null, true);
+//         callback(new Error('Not allowed by CORS'))
+//     },
+//     credentials: true
+// }));
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
     res.header("Access-Control-Allow-Methods", "PUT, POST, GET, DELET, OPTIONS");
     res.header("Access-Control-Allow-Credentials", true);
     if (req.method == 'OPTIONS') {
