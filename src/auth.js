@@ -1,6 +1,6 @@
 const md5 = require('md5');
 // const { RedisClient } = require('redis');
-// const redis = require('redis').createClient('redis://:pbc3da20f6d535863ee1f32388a3b682d1911feb7258d23b087fc2b23119428b3@ec2-52-201-42-204.compute-1.amazonaws.com:6710');//(process.env.REDIS_URL);
+// const redis = require('redis').createClient('redis://:pbc3da20f6d535863ee1f32388a3b682d1911feb7258d23b087fc2b23119428b3@ec2-52-201-42-204.compute-1.amazonaws.com:6709');//(process.env.REDIS_URL);
 const redis = require('redis').createClient(process.env.REDIS_URL);
 // const redis = null;
 const mongoose = require('mongoose');
@@ -30,20 +30,28 @@ function isLoggedIn(req, res, next) {
         return res.sendStatus(401);
     }
 
-    let username = null;
     if (redis) {
-        username = redis.hget('session', sid);
+        redis.hget('session', sid, (err, username) => {
+            // no username mapped to sid
+            if (username) {
+                req.username = username;
+                next();
+            }
+            else {
+                return res.sendStatus(401)
+            }
+        });
     } else {
-        username = sessionUser[sid];
-    }
+        let username = sessionUser[sid];
 
-    // no username mapped to sid
-    if (username) {
-        req.username = username;
-        next();
-    }
-    else {
-        return res.sendStatus(401)
+        // no username mapped to sid
+        if (username) {
+            req.username = username;
+            next();
+        }
+        else {
+            return res.sendStatus(401)
+        }
     }
 }
 
@@ -77,7 +85,7 @@ async function login(req, res) {
         }
 
         // Adding cookie for session id
-        res.cookie(cookieKey, sid, { maxAge: 3600 * 1000, httpOnly: true, sameSite: 'none', secure: true });
+        res.cookie(cookieKey, sid, { maxAge: 3600 * 1000, httpOnly: true, sameSite: 'none' });
         let msg = { username: username, result: 'success' };
         res.send(msg);
     }
