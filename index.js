@@ -15,34 +15,34 @@ const cors = require('cors');
 const whiteList = ['http://localhost:3000', '*', '/*', '127.0.0.1', '0.0.0.0'];
 // const upCloud=require('./src/uploadCloudinary');
 
-const hello = (req, res) => res.send({ hello: 'world!' });
+const hello = (req, res) => res.send({ hello: 'world' });
 
 
 
 const app = express();
-// app.use(cors({
-//     origin: (origin, callback) => {
-//         // if (whiteList.indexOf(origin) !== -1) return callback(null, true)
-//         return callback(null, true);
-//         callback(new Error('Not allowed by CORS'))
-//     },
-//     credentials: true
-// }));
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    );
-    res.header("Access-Control-Allow-Methods", "PUT, POST, GET, DELET, OPTIONS");
-    res.header("Access-Control-Allow-Credentials", true);
-    if (req.method == 'OPTIONS') {
-        res.sendStatus(200);
-        return;
-    } else {
-        next();
-    }
-});
+app.use(cors({
+    origin: (origin, callback) => {
+        // if (whiteList.indexOf(origin) !== -1) return callback(null, true)
+        return callback(null, true);
+        callback(new Error('Not allowed by CORS'))
+    },
+    credentials: true
+}));
+// app.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header(
+//         "Access-Control-Allow-Headers",
+//         "Origin, X-Requested-With, Content-Type, Accept"
+//     );
+//     res.header("Access-Control-Allow-Methods", "PUT, POST, GET, DELET, OPTIONS");
+//     res.header("Access-Control-Allow-Credentials", true);
+//     if (req.method == 'OPTIONS') {
+//         res.sendStatus(200);
+//         return;
+//     } else {
+//         next();
+//     }
+// });
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.get('/', hello);
