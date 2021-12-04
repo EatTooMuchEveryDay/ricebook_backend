@@ -15,7 +15,7 @@ const cors = require('cors');
 const whiteList = ['http://localhost:3000', '*', '/*', '127.0.0.1', '0.0.0.0'];
 // const upCloud=require('./src/uploadCloudinary');
 
-const hello = (req, res) => res.send({ hello: 'world' });
+const hello = (req, res) => res.send({ hello: 'world!' });
 
 
 
