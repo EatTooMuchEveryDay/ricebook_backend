@@ -87,6 +87,8 @@ async function updateAvatar(req, res) {
 }
 
 module.exports = (app) => {
+    app.get('/whoami', (req, res) => { res.send(req.username) });
+
     app.get('/headline/:user', (req, res) => { getProfile(req, res, false, 'headline') });
     app.get('/headline', (req, res) => { getProfile(req, res, true, 'headline') });
     app.put('/headline', (req, res) => { updateProfile(req, res, 'headline') });
