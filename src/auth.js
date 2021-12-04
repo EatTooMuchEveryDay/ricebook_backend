@@ -1,6 +1,7 @@
 const md5 = require('md5');
 // const { RedisClient } = require('redis');
-// const redis = require('redis').createClient('redis://:pbc3da20f6d535863ee1f32388a3b682d1911feb7258d23b087fc2b23119428b3@ec2-54-144-44-166.compute-1.amazonaws.com:6539');//(process.env.REDIS_URL);
+// const redis = require('redis').createClient('redis://:pbc3da20f6d535863ee1f32388a3b682d1911feb7258d23b087fc2b23119428b3@ec2-52-201-42-204.compute-1.amazonaws.com:6710');//(process.env.REDIS_URL);
+const redis = null;
 const mongoose = require('mongoose');
 const userSchema = require('./userSchema');
 const User = mongoose.model('user', userSchema);
@@ -28,8 +29,12 @@ function isLoggedIn(req, res, next) {
         return res.sendStatus(401);
     }
 
-    let username = sessionUser[sid];
-    // let username = redis.hget('session', sid);
+    let username = null;
+    if (redis) {
+        username = redis.hget('session', sid);
+    } else {
+        username = sessionUser[sid];
+    }
 
     // no username mapped to sid
     if (username) {
@@ -47,7 +52,7 @@ async function login(req, res) {
 
     // supply username and password
     if (!username || !password) {
-        return res.sendStatus(400);
+        return res.send({ username: username, result: 'failed' });
     }
 
     // let user = userObjs[username];
@@ -57,15 +62,18 @@ async function login(req, res) {
     }));
 
     if (!user) {
-        return res.sendStatus(401)
+        return res.send({ username: username, result: 'failed' });
     }
 
     let hash = md5(user.salt + password);
 
     if (hash === user.hash) {
         let sid = Math.floor(Math.random() * 10000000);
-        sessionUser[sid] = (username);
-        // redis.hset('session', sid, username);
+        if (redis) {
+            redis.hset('session', sid, username);
+        } else {
+            sessionUser[sid] = (username);
+        }
 
         // Adding cookie for session id
         res.cookie(cookieKey, sid, { maxAge: 3600 * 1000, httpOnly: true });
@@ -73,7 +81,7 @@ async function login(req, res) {
         res.send(msg);
     }
     else {
-        res.sendStatus(401);
+        res.send({ username: username, result: 'failed' });
     }
 }
 
@@ -83,8 +91,11 @@ function logout(req, res) {
     // let username = sessionUser[sid];
     // let username = redis.hget('session', sid);
 
-    // redis.hdel('session', sid);
-    delete sessionUser[sid];
+    if (redis) {
+        redis.hdel('session', sid);
+    } else {
+        delete sessionUser[sid];
+    }
 
     let msg = 'OK';
     res.send(msg);

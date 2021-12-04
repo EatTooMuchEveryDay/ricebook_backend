@@ -1,10 +1,12 @@
+const md5 = require('md5');
+const multer = require('multer')
 const mongoose = require('mongoose');
 const userSchema = require('./userSchema');
 const User = mongoose.model('user', userSchema);
 const profileSchema = require('./profileSchema');
 const Profile = mongoose.model('profile', profileSchema);
 const connectionString = 'mongodb+srv://new-user1:ricecomp531@cluster0.kcggc.mongodb.net/ricebook';
-const md5 = require('md5');
+const uploadImg = require('./uploadCloudinary');
 
 
 async function getProfile(req, res, mine, attr) {
@@ -73,29 +75,32 @@ async function updateProfile(req, res, attr) {
 async function updateAvatar(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
 
+    await connector.then(() => {
+        return Profile.updateOne({ username: req.username }, { avatar: req.fileurl }).exec();
+    });
+
     let profile = await connector.then(() => {
         return Profile.findOne({ username: req.username }).exec();
     });
 
-    // TODO update avatar
-    return res.send({ username: user.username, avatar: 'hardcoded avatar url' });
+    return res.send({ username: req.username, avatar: profile.avatar });
 }
 
 module.exports = (app) => {
-    app.get('/headline/:user', (res, req) => { getProfile(res, req, false, 'headline') });
-    app.get('/headline', (res, req) => { getProfile(res, req, true, 'headline') });
-    app.put('/headline', (res, req) => { updateProfile(res, req, 'headline') });
+    app.get('/headline/:user', (req, res) => { getProfile(req, res, false, 'headline') });
+    app.get('/headline', (req, res) => { getProfile(req, res, true, 'headline') });
+    app.put('/headline', (req, res) => { updateProfile(req, res, 'headline') });
 
-    app.get('/email/:user', (res, req) => { getProfile(res, req, false, 'email') });
-    app.get('/email', (res, req) => { getProfile(res, req, true, 'email') });
-    app.put('/email', (res, req) => { updateProfile(res, req, 'email') });
-    app.get('/zipcode/:user', (res, req) => { getProfile(res, req, false, 'zipcode') });
-    app.get('/zipcode', (res, req) => { getProfile(res, req, true, 'zipcode') });
-    app.put('/zipcode', (res, req) => { updateProfile(res, req, 'zipcode') });
-    app.get('/dob/:user', (res, req) => { getProfile(res, req, false, 'dob') });
-    app.get('/dob', (res, req) => { getProfile(res, req, true, 'dob') });
+    app.get('/email/:user', (req, res) => { getProfile(req, res, false, 'email') });
+    app.get('/email', (req, res) => { getProfile(req, res, true, 'email') });
+    app.put('/email', (req, res) => { updateProfile(req, res, 'email') });
+    app.get('/zipcode/:user', (req, res) => { getProfile(req, res, false, 'zipcode') });
+    app.get('/zipcode', (req, res) => { getProfile(req, res, true, 'zipcode') });
+    app.put('/zipcode', (req, res) => { updateProfile(req, res, 'zipcode') });
+    app.get('/dob/:user', (req, res) => { getProfile(req, res, false, 'dob') });
+    app.get('/dob', (req, res) => { getProfile(req, res, true, 'dob') });
 
-    app.get('/avatar/:user', (res, req) => { getProfile(res, req, false, 'avatar') });
-    app.get('/avatar', (res, req) => { getProfile(res, req, true, 'avatar') });
-    app.put('/avatar', updateAvatar);
+    app.get('/avatar/:user', (req, res) => { getProfile(req, res, false, 'avatar') });
+    app.get('/avatar', (req, res) => { getProfile(req, res, true, 'avatar') });
+    app.put('/avatar', (req, res, next) => { uploadImg(req, res, req.username, 'avatars', next) }, updateAvatar);
 }

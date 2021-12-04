@@ -30,7 +30,7 @@ async function getArticle(req, res) {
 async function addArticle(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
     let post = req.body;
-    let article = { id: md5(req.username + Date.now() + Math.random()), author: req.username, text: post.text, comments: [], time: Date.now() };
+    let article = { id: req.fileid == null ? md5(req.username + Date.now() + Math.random()) : req.fileid, author: req.username, text: post.text, comments: [], time: Date.now(), image: req.fileurl == null ? "" : req.fileurl };
     // articles.push(article);
     await (connector.then(async () => {
         return new Article(article).save();
@@ -89,6 +89,6 @@ async function updateArticle(req, res) {
 module.exports = (app) => {
     app.get('/articles', getArticles);
     app.get('/articles/:id', getArticle);
-    app.post('/article', addArticle);
+    app.post('/article', (req, res, next) => { uploadImg(req, res, md5(req.username + Date.now() + Math.random()), 'articles', next) }, addArticle);
     app.put('/articles/:id', updateArticle);
 }
