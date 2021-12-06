@@ -29,8 +29,8 @@ function uploadImg(req, res, publicId, folder, next) {
             return;
         }
 
+        // upload to cloudinary
         const uploadStream = cloudinary.uploader.upload_stream(result => {
-            // capture the url and public_id and add to the request
             req.fileurl = result.url;
             req.fileid = result.public_id;
             next();

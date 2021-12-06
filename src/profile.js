@@ -30,7 +30,7 @@ async function getProfile(req, res, mine, attr) {
 
     return res.send({
         username: profile.username,
-        [attr]: attr == 'dob' ? profile[attr].getTime() : profile[attr]
+        [attr]: attr == 'avatar' ? (profile[attr] == '' ? 'https://res.cloudinary.com/hdlvq0ifw/image/upload/v1638694172/avatars/1USER_hcrgns.png' : profile[attr]) : profile[attr]
     });
 }
 
@@ -78,12 +78,7 @@ async function updateAvatar(req, res) {
     await connector.then(() => {
         return Profile.updateOne({ username: req.username }, { avatar: req.fileurl }).exec();
     });
-
-    let profile = await connector.then(() => {
-        return Profile.findOne({ username: req.username }).exec();
-    });
-
-    return res.send({ username: req.username, avatar: profile.avatar });
+    return res.send({ username: req.username, avatar: req.fileurl });
 }
 
 module.exports = (app) => {
@@ -101,6 +96,12 @@ module.exports = (app) => {
     app.put('/zipcode', (req, res) => { updateProfile(req, res, 'zipcode') });
     app.get('/dob/:user', (req, res) => { getProfile(req, res, false, 'dob') });
     app.get('/dob', (req, res) => { getProfile(req, res, true, 'dob') });
+    app.put('/dob', (req, res) => { updateProfile(req, res, 'dob') });
+    app.get('/phone/:user', (req, res) => { getProfile(req, res, false, 'phone') });
+    app.get('/phone', (req, res) => { getProfile(req, res, true, 'phone') });
+    app.put('/phone', (req, res) => { updateProfile(req, res, 'phone') });
+
+    app.get('/passwordlength', (req, res) => { getProfile(req, res, true, 'passwordlength') });
 
     app.get('/avatar/:user', (req, res) => { getProfile(req, res, false, 'avatar') });
     app.get('/avatar', (req, res) => { getProfile(req, res, true, 'avatar') });

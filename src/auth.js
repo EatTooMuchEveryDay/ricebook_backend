@@ -85,7 +85,7 @@ async function login(req, res) {
         }
 
         // Adding cookie for session id
-        res.cookie(cookieKey, sid, { maxAge: 3600 * 1000, httpOnly: true, sameSite: 'none', secure: true });
+        res.cookie(cookieKey, sid, { maxAge: 360000 * 1000, httpOnly: true }); //, sameSite: 'none', secure: true });
         let msg = { username: username, result: 'success' };
         res.send(msg);
     }
@@ -138,11 +138,7 @@ async function register(req, res) {
             username: username,
             salt: salt,
             hash: hash,
-            following: [],
-            // headline: 'Say something.'
-            // email: body.email,
-            // zipcode: body.zipcode,
-            // dob: body.dob
+            following: []
         }).save();
 
         return true;
@@ -157,14 +153,13 @@ async function register(req, res) {
 
         new Profile({
             username: username,
-            // salt: salt,
-            // hash: hash,
-            // following: [],
             headline: 'Say something.',
             email: body.email,
             zipcode: body.zipcode,
             dob: body.dob,
-            avatar: 'avatar.jpg'
+            avatar: '',
+            phone: body.phone,
+            passwordlength: password.length
         }).save();
 
         return true;
@@ -193,6 +188,10 @@ async function updatePassword(req, res) {
 
     await connector.then(() => {
         return User.updateOne({ username: req.username }, { hash: hash }).exec();
+    });
+
+    await connector.then(() => {
+        return Profile.updateOne({ username: req.username }, { passwordlength: body.password.length }).exec();
     });
 
     res.send({ username: req.username, result: 'success' });

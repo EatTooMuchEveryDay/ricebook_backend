@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const profileSchema = new mongoose.Schema({
   username: String,
   headline: String,
-  dob: Date,
+  dob: String,
   zipcode: String,
   email: String,
-  avatar: String
+  avatar: String,
+  phone: String,
+  passwordlength: Number
 })
 
 module.exports = profileSchema;

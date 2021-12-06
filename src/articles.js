@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
 const articleSchema = require('./articleSchema');
 const Article = mongoose.model('article', articleSchema);
+const userSchema = require('./userSchema');
+const User = mongoose.model('user', userSchema);
 const connectionString = 'mongodb+srv://new-user1:ricecomp531@cluster0.kcggc.mongodb.net/ricebook';
 const md5 = require('md5');
+const uploadImg = require('./uploadCloudinary');
 
 // let articles = [{ id: 0, author: 'Mack', body: 'Post 1' },
 // { id: 1, author: 'Jack', body: 'Post 2' },
@@ -11,36 +14,46 @@ const md5 = require('md5');
 
 async function getArticles(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
-    let articles = await (connector.then(async () => {
-        return Article.find({ author: req.username }).exec();
-    }));
-    // TODO feed还包括follow的
-    res.send({ articles: articles });
+    let user = await connector.then(async () => {
+        return User.findOne({ username: req.username }).exec();
+    });
+    let users = user.following;
+    users.push(req.username);
+
+    let articles = await connector.then(async () => {
+        return Article.find({ author: { $in: users } }).sort('-time').limit(10).exec();
+    })
+
+    let msg = {
+        articles: articles
+    };
+    res.send(msg);
 }
 
 async function getArticle(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
-    // TODO 要分id和username两种情况
-    let article = await (connector.then(async () => {
+
+    let article = await connector.then(async () => {
         return Article.findOne({ id: req.params.id }).exec();
-    }));
-    res.send({ articles: [article] });
+    });
+
+    let msg = {
+        articles: [article]
+    };
+    res.send(msg);
 }
 
 async function addArticle(req, res) {
     const connector = mongoose.connect(connectionString, { useNewUrlParser: true, useUnifiedTopology: true });
     let post = req.body;
-    let article = { id: req.fileid == null ? md5(req.username + Date.now() + Math.random()) : req.fileid, author: req.username, text: post.text, comments: [], time: Date.now(), image: req.fileurl == null ? "" : req.fileurl };
-    // articles.push(article);
+    let article = { id: md5(req.username + Date.now() + Math.random()), author: req.username, text: post.text, title: post.title, comments: [], time: Date.now(), image: req.fileurl };
+
     await (connector.then(async () => {
         return new Article(article).save();
     }));
 
-    // TODO feed
-    let articles = await (connector.then(async () => {
-        return Article.find({ author: req.username }).exec();
-    }));
-    res.send({ articles: articles });
+    let msg = { articles: [article] };
+    res.send(msg);
 }
 
 async function updateArticle(req, res) {
@@ -79,11 +92,11 @@ async function updateArticle(req, res) {
         await Article.updateOne({ id: req.params.id }, { comments: article.comments }).exec();
     }
 
-    // TODO feed
-    let articles = await (connector.then(async () => {
-        return Article.find({ author: req.username }).exec();
+    article = await (connector.then(async () => {
+        return Article.findOne({ id: req.params.id }).exec();
     }));
-    res.send({ articles: articles });
+    let msg = { articles: [article] };
+    res.send(msg);
 }
 
 module.exports = (app) => {
