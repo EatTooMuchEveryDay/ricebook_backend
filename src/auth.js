@@ -85,7 +85,7 @@ async function login(req, res) {
         }
 
         // Adding cookie for session id
-        res.cookie(cookieKey, sid, { maxAge: 360000 * 1000, httpOnly: true }); //, sameSite: 'none', secure: true });
+        res.cookie(cookieKey, sid, { maxAge: 360000 * 1000, httpOnly: true, sameSite: 'none', secure: true });
         let msg = { username: username, result: 'success' };
         res.send(msg);
     }
